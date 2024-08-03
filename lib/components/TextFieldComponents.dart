@@ -4,28 +4,28 @@ class TextFieldComponents extends StatefulWidget {
   const TextFieldComponents({super.key});
 
   @override
-  State<TextFieldComponents> createState() => _TextFieldComponentsState();
+  State<TextFieldComponents> createState() => _TextFieldComponentsState(emptyPasswordFocusNode: FocusNode());
 }
 
 class _TextFieldComponentsState extends State<TextFieldComponents> {
   bool emptyShowPussword = true;
-  bool typingShowPussword = true;
-  bool filledShowPussword = true;
-  bool errorShowPussword = true;
 
   late FocusNode emptyPasswordFocusNode;
-  late FocusNode typingPasswordFocusNode;
-  late FocusNode filledPasswordFocusNode;
-  late FocusNode errorPasswordFocusNode;
+
+  String errorText = '';
+
+  final typingStateColor = const Color(0xFF006FFD);
+  final emptyStateColor = const Color(0xFFC5C6CC);
+
+  _TextFieldComponentsState({
+    required this.emptyPasswordFocusNode,
+});
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     emptyPasswordFocusNode = FocusNode();
-    typingPasswordFocusNode = FocusNode();
-    filledPasswordFocusNode = FocusNode();
-    errorPasswordFocusNode = FocusNode();
   }
 
   @override
@@ -33,27 +33,17 @@ class _TextFieldComponentsState extends State<TextFieldComponents> {
     // TODO: implement dispose
     super.dispose();
     emptyPasswordFocusNode.dispose();
-    typingPasswordFocusNode.dispose();
-    filledPasswordFocusNode.dispose();
-    errorPasswordFocusNode.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _emptyTextField(),
-            _typingTextField(),
-            _filledTextField(),
-            _errorTextField(),
-            _inactiveTextField()
-          ],
-        ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _emptyTextField(),
+        ],
       ),
     );
   }
@@ -62,8 +52,18 @@ class _TextFieldComponentsState extends State<TextFieldComponents> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextField(
-        onChanged: (String emptyTyping) {},
+        onChanged: (value) {
+          setState(() {
+            if (value.length > 11) {
+              errorText = 'Error';
+            }
+            else {
+              errorText = '';
+            }
+          });
+        },
         focusNode: emptyPasswordFocusNode,
+        enabled: true,                  //если установить false , то будет состояние inactive
         onTap: () {
           setState(() {
             FocusScope.of(context).unfocus();
@@ -72,13 +72,17 @@ class _TextFieldComponentsState extends State<TextFieldComponents> {
         },
         obscureText: emptyShowPussword,
         decoration: InputDecoration(
-          labelText: 'Title',
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.blueAccent, width: 2)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.grey.shade700)),
+          errorText: errorText.isEmpty ? null : errorText,
+          //labelText: 'Title',                   //title
+          border: OutlineInputBorder( //борт для Error состояния
+            borderRadius: BorderRadius.circular(12),
+          ),
+          focusedBorder: OutlineInputBorder( //борт в typing состоянии
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: typingStateColor , width: 2)),
+          enabledBorder: OutlineInputBorder( //борт в empty состоянии
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: emptyStateColor, width: 1)),
           suffixIcon: IconButton(
             icon: Icon(Icons.remove_red_eye),
             onPressed: () {
@@ -93,128 +97,4 @@ class _TextFieldComponentsState extends State<TextFieldComponents> {
     );
   }
 
-  Widget _typingTextField() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        onChanged: (String typing) {},
-        focusNode: typingPasswordFocusNode,
-        onTap: () {
-          setState(() {
-            FocusScope.of(context).unfocus();
-            FocusScope.of(context).requestFocus(typingPasswordFocusNode);
-          });
-        },
-        obscureText: typingShowPussword,
-        decoration: InputDecoration(
-          labelText: 'Title',
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.blueAccent, width: 2)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.blueAccent, width: 2)),
-          hintText: 'Введите текст',
-          suffixIcon: IconButton(
-            icon: Icon(Icons.remove_red_eye),
-            onPressed: () {
-              setState(() {
-                typingShowPussword = !typingShowPussword;
-              });
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _filledTextField() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        onChanged: (String filledTyping) {}, //filled
-        focusNode: filledPasswordFocusNode,
-        onTap: () {
-          setState(() {
-            FocusScope.of(context).unfocus();
-            FocusScope.of(context).requestFocus(filledPasswordFocusNode);
-          });
-        },
-        obscureText: filledShowPussword,
-        decoration: InputDecoration(
-          labelText: 'Title',
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.grey.shade700)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.grey.shade700)),
-          hintText: 'Введите текст',
-          suffixIcon: IconButton(
-            icon: Icon(Icons.remove_red_eye),
-            onPressed: () {
-              setState(() {
-                filledShowPussword = !filledShowPussword;
-              });
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _errorTextField() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        onChanged: (String errorTyping) {}, //error
-        focusNode: errorPasswordFocusNode,
-        onTap: () {
-          setState(() {
-            FocusScope.of(context).unfocus();
-            FocusScope.of(context).requestFocus(errorPasswordFocusNode);
-          });
-        },
-        obscureText: errorShowPussword,
-        decoration: InputDecoration(
-          labelText: 'Title',
-          errorText: 'Error',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          hintText: 'Введите текст',
-          suffixIcon: IconButton(
-            icon: Icon(Icons.remove_red_eye),
-            color: Colors.red,
-            onPressed: () {
-              setState(() {
-                errorShowPussword = !errorShowPussword;
-              });
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _inactiveTextField() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        onChanged: (String inactiveTyping) {}, //inactive
-        decoration: InputDecoration(
-          labelText: 'Title',
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.grey)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: BorderSide(color: Colors.grey)),
-          hintText: 'Введите текст',
-          filled: true,
-          fillColor: Colors.grey.shade50
-        ),
-      ),
-    );
-  }
 }
